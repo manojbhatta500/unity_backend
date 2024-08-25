@@ -1,6 +1,13 @@
 const UserModel = require('../models/user_model');
 
 var validator = require("email-validator");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+require('dotenv').config();
+
+
+const secretKey = process.env.SECRETKEY;
+
  
 
 
@@ -51,19 +58,26 @@ async function signUp(req,res){
                 message: "Username already taken."
             }); 
         }
+
+        // generating hashed password
+        const hashedPassword = await  bcrypt.hash(password,10);
+
+
+
         const userSignUpResult = await UserModel.create({
             username : username,
             email: email,
-            password_hash: password
+            password_hash: hashedPassword
         });
+
         return res.status(200).json({
             status: "success",
-            message: "user registered successfully."
+            message:  username + " registered successfully."
         });
     }catch(e){
         return res.status(400).json({
             status: "error",
-            message: "sorry, can't create an error"
+            message: "we can't create an account at this moment."
         });
     }
 }
@@ -87,3 +101,12 @@ module.exports = {
 
 
 
+
+// now to dos 
+// integrate the signup with flutter app 
+// think about dynamic api 
+
+
+// mobile will call one gernal api which will return an list of api 
+// mobile will not store api endpoint locally 
+// maybe use this  idk i will think about it 

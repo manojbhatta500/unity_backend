@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'inactive', 'suspended'],
         default: 'active'
-    }
+    },
 });
 
 const UserModel = mongoose.model('UserModel', userSchema);
