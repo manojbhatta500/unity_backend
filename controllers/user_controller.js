@@ -60,7 +60,6 @@ async function signUp(req,res){
             status: "success",
             message: "user registered successfully."
         });
-        console.log("user registered  successfully");
     }catch(e){
         return res.status(400).json({
             status: "error",
