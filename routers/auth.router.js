@@ -1,16 +1,10 @@
 const express = require('express');
 
+const userController = require('../controllers/user_controller');
 const router = express.Router();
 
 
-const loginwithemail = router.get('/',(req,res)=>{
-    console.log('jello world')
-    res.json({
-        'jellow':'world'
-    });
-});
+router.get('/login',userController.signUp);
 
 
-module.exports = {
-    loginwithemail
-};
+module.exports = router;

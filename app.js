@@ -1,29 +1,47 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const db = require('./db');
+
+
+// config for using dotenv
 require('dotenv').config();
 
 
-const {loginwithemail} = require('./routers/auth.router')
+// importing db connections
+const db = require('./db');
 
+
+// importing diffrent routers
+const authRouter = require('./routers/auth.router')
+
+
+// creating app
 const app = express();
-
 app.use(bodyParser.json()); 
 app.use(cors());
 
+
+
+
+// this is for testing
 app.get('/test', (req, res) => {
     console.log('test route is working');
     res.send('Test route is working');
 });
 
 
-app.use('/auth',loginwithemail);
+
+// here we will use other middleware 
+
+
+app.use(authRouter);
 
 
   
 
 
+
+// port setting from env
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log('server is running on port', PORT);
