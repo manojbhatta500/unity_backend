@@ -70,6 +70,8 @@ async function signUp(req,res){
             password_hash: hashedPassword
         });
 
+
+        console.log('user created successfully');
         return res.status(200).json({
             status: "success",
             message:  username + " registered successfully."
@@ -83,7 +85,45 @@ async function signUp(req,res){
 }
 
 
-async function login(params) {
+async function login(req,res) {
+
+    const {
+        email,
+        password
+    } = req.body;
+
+    if(!email || !password ){
+        return res.status(400).json({
+            status: "error",
+            message: "email,password  are  required."
+        });
+    }
+
+    if(!validator.validate(email)){
+        return res.status(400).json({
+            status: "error",
+            message: "invalid email."
+        });
+    }
+
+    const alreadyExistUser = await UserModel.findOne({
+        email : email
+    });
+
+    if(!alreadyExistUser){
+        return res.status(400).json({
+            status: "error",
+            message: "User not Registered."
+        }); 
+    }
+
+
+    // next steps now if user exists and then check the password unhash an compare it 
+    // if it matches then login otherwise wrong password
+
+
+
+    
     
 }
 
@@ -102,11 +142,4 @@ module.exports = {
 
 
 
-// now to dos 
-// integrate the signup with flutter app 
-// think about dynamic api 
 
-
-// mobile will call one gernal api which will return an list of api 
-// mobile will not store api endpoint locally 
-// maybe use this  idk i will think about it 
