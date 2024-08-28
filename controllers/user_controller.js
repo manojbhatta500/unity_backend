@@ -95,7 +95,8 @@ async function login(req,res) {
     if(!email || !password ){
         return res.status(400).json({
             status: "error",
-            message: "email,password  are  required."
+            message: "email,password  are  required.",
+
         });
     }
 
@@ -118,12 +119,29 @@ async function login(req,res) {
     }
 
 
-    // next steps now if user exists and then check the password unhash an compare it 
-    // if it matches then login otherwise wrong password
+    const matchedPassword = await bcrypt.compare(password, alreadyExistUser.password_hash);
 
 
+    if(!matchedPassword){
+        return res.status(400).json(
+            {
+            status: "error",
+            message: "Sorry, Wrong Password"
+        }
+    ); 
+    }
 
-    
+
+    console.log('password matched so it means user can kind of login');
+
+
+const token = jwt.sign({ userId: alreadyExistUser._id }, secretKey); // You can set an expiration time
+
+return res.status(200).json({
+    status: "success",
+    message: "Login successful",
+    token: token,  
+});    
     
 }
 
@@ -136,7 +154,8 @@ async function update(params) {
 }
 
 module.exports = {
-    signUp
+    signUp,
+    login
 }
 
 

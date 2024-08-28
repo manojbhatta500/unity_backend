@@ -2,6 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const {
+    authenticateUser
+} = require('./middlewares/authenticate.user');
+
 
 // config for using dotenv
 require('dotenv').config();
@@ -35,6 +39,16 @@ app.get('/test', (req, res) => {
 
 
 app.use(authRouter);
+
+app.post('/check',authenticateUser,(req,res)=>{
+    
+
+    console.log('this is check user  working  ')
+    res.json({
+        status: "this is status"
+    });
+
+});
 
 
   
