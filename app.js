@@ -19,6 +19,7 @@ const db = require('./db');
 const authRouter = require('./routers/auth.router')
 
 
+
 // creating app
 const app = express();
 app.use(bodyParser.json()); 
@@ -40,15 +41,28 @@ app.get('/test', (req, res) => {
 
 app.use(authRouter);
 
-app.post('/check',authenticateUser,(req,res)=>{
-    
 
-    console.log('this is check user  working  ')
-    res.json({
-        status: "this is status"
-    });
 
-});
+
+
+
+
+
+
+
+
+
+
+
+// app.post('/check',authenticateUser,(req,res)=>{
+//     console.log('this is check user  working  ')
+//     res.json({
+//         status: "this is status"
+//     });
+
+// });
+
+
 
 
   
@@ -60,3 +74,12 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log('server is running on port', PORT);
 });
+
+
+//  otp model  takes email : and saves otp 
+// how 
+// forgot password 
+// checks email
+// if present generates otp and generates it  on a collections
+// user gives otp and  if matches and then gives password and updates  the password 
+// 

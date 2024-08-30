@@ -1,8 +1,14 @@
 const UserModel = require('../models/user_model');
+const OtpModel = require('../models/otp_model');
 
 var validator = require("email-validator");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const sendOtpEmail = require('../utils/otp_email'); 
+
+const otpGenerator = require('otp-generator'); 
+
+
 require('dotenv').config();
 
 
@@ -86,17 +92,69 @@ async function signUp(req,res){
 
 
 async function login(req,res) {
-
     const {
         email,
         password
     } = req.body;
-
     if(!email || !password ){
         return res.status(400).json({
             status: "error",
             message: "email,password  are  required.",
 
+        });
+    }
+    if(!validator.validate(email)){
+        return res.status(400).json({
+            status: "error",
+            message: "invalid email."
+        });
+    }
+    const alreadyExistUser = await UserModel.findOne({
+        email : email
+    });
+    if(!alreadyExistUser){
+        return res.status(400).json({
+            status: "error",
+            message: "User not Registered."
+        }); 
+    }
+    const matchedPassword = await bcrypt.compare(password, alreadyExistUser.password_hash);
+    if(!matchedPassword){
+        return res.status(400).json(
+            {
+            status: "error",
+            message: "Sorry, Wrong Password"
+        }
+    ); 
+    }
+    console.log('password matched so it means user can kind of login');
+const token = jwt.sign({ userId: alreadyExistUser._id }, secretKey); 
+
+return res.status(200).json({
+    status: "success",
+    message: "Login successful",
+    token: token,  
+});    
+    
+}
+
+async function logout(params) {
+    
+}
+
+async function update(params) {
+    
+}
+
+
+async function forgotPassword(req,res) {
+
+    const {email} = req.body;
+
+    if(!email){
+        res.json({
+            status: "error",
+            message: "please provide the email."
         });
     }
 
@@ -116,46 +174,170 @@ async function login(req,res) {
             status: "error",
             message: "User not Registered."
         }); 
-    }
+    } 
+    
+    const otp = otpGenerator.generate(4, {
+        digits: true,
+        upperCaseAlphabets: false,
+        lowerCaseAlphabets:false,
+        specialChars: false
+    });
+    const otpResult = await sendOtpEmail(email,otp);
+
+    console.log('the otp is ',otp);
 
 
-    const matchedPassword = await bcrypt.compare(password, alreadyExistUser.password_hash);
+    const filter = { email: email }; 
+
+    const update = { otp: otp }; 
+
+    const options = { 
+            upsert: true, 
+            new: true 
+        };
+
+    const otpStorageResult = await OtpModel.findOneAndUpdate(filter, update, options);
 
 
-    if(!matchedPassword){
-        return res.status(400).json(
-            {
+
+    
+
+    res.status(200).json({
+        status: 'success',
+        message: 'OTP sent successfully to your email.',
+    });    
+}
+
+
+
+
+
+async function checkOtp(req,res) {
+
+    const { otp,email} = req.body;
+
+    if(!otp || !email){
+        return res.json({
             status: "error",
-            message: "Sorry, Wrong Password"
-        }
-    ); 
+            message: "both otp and email are required."
+        });
     }
 
 
-    console.log('password matched so it means user can kind of login');
+    if(!validator.validate(email)){
+        return res.status(400).json({
+            status: "error",
+            message: "invalid email."
+        });
+    }
 
+    const alreadyExistUser = await UserModel.findOne({
+        email : email
+    });
 
-const token = jwt.sign({ userId: alreadyExistUser._id }, secretKey); // You can set an expiration time
+    if(!alreadyExistUser){
+        return res.status(400).json({
+            status: "error",
+            message: "User not Registered."
+        }); 
+    } 
 
-return res.status(200).json({
-    status: "success",
-    message: "Login successful",
-    token: token,  
-});    
     
+    const findOtpDetails = await OtpModel.findOne({ email: email });
+
+if (!findOtpDetails) {
+    console.log("No OTP found for the given email.");
+    return res.status(404).json({ status: "Error", message: "OTP not found" });
 }
 
-async function logout(params) {
-    
+const savedOtp = findOtpDetails.otp;
+
+console.log("saved otp is ", savedOtp);
+console.log("user otp is ", otp);
+
+
+    if( savedOtp == otp){
+        return res.status(200).json({
+            status: "success",
+            message: "verified Otp."
+        }); 
+    }else{
+        return res.status(400).json({
+            status: "error",
+            message: "Try again otp did not matched."
+        }); 
+    }
 }
 
-async function update(params) {
-    
+async function afterVerificationChangePassword(req, res) {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({
+            status: "error",
+            message: "Both email and password are required."
+        });
+    }
+
+    if (!validator.validate(email)) {
+        return res.status(400).json({
+            status: "error",
+            message: "Invalid email format."
+        });
+    }
+
+    if (password.length < 8) {
+        return res.status(400).json({
+            status: "error",
+            message: "Password length must be at least 8 characters."
+        });
+    }
+
+    try {
+        const alreadyExistUser = await UserModel.findOne({ email: email });
+        
+        if (!alreadyExistUser) {
+            return res.status(400).json({
+                status: "error",
+                message: "User not registered."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const filter = { email: email }; 
+        const update = { password_hash: hashedPassword }; 
+        const options = { new: true }; // Remove upsert if you don't want to create new users
+
+        const updatedUser = await UserModel.findOneAndUpdate(filter, update, options);
+
+        if (updatedUser) {
+            return res.status(200).json({
+                status: "success",
+                message: "Password changed successfully."
+            });
+        } else {
+            return res.status(500).json({
+                status: "error",
+                message: "Something went wrong while updating the password."
+            });
+        }
+    } catch (error) {
+        console.error('Error changing password:', error);
+        return res.status(500).json({
+            status: "error",
+            message: "Internal server error."
+        });
+    }
 }
+
 
 module.exports = {
     signUp,
-    login
+    login,
+    checkOtp,
+    forgotPassword,
+    afterVerificationChangePassword
 }
 
 
