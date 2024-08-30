@@ -91,60 +91,74 @@ async function signUp(req,res){
 }
 
 
-async function login(req,res) {
-    const {
-        email,
-        password
-    } = req.body;
-    if(!email || !password ){
-        return res.status(400).json({
-            status: "error",
-            message: "email,password  are  required.",
+async function login(req, res) {
+    const { email, password } = req.body;
 
-        });
-    }
-    if(!validator.validate(email)){
+    console.log('Incoming request body:', req.body);
+
+    if (!email || !password) {
+        console.log('Missing email or password');
         return res.status(400).json({
             status: "error",
-            message: "invalid email."
+            message: "email and password are required.",
         });
     }
-    const alreadyExistUser = await UserModel.findOne({
-        email : email
-    });
-    if(!alreadyExistUser){
+
+    if (!validator.validate(email)) {
+        console.log('Invalid email format');
         return res.status(400).json({
             status: "error",
-            message: "User not Registered."
-        }); 
+            message: "Invalid email.",
+        });
     }
-    const matchedPassword = await bcrypt.compare(password, alreadyExistUser.password_hash);
-    if(!matchedPassword){
-        return res.status(400).json(
-            {
-            status: "error",
-            message: "Sorry, Wrong Password"
+
+    console.log("before try");
+    try {
+
+        const alreadyExistUser = await UserModel.findOne({ email });
+
+        console.log('Query result:', alreadyExistUser);
+
+
+        if (!alreadyExistUser) {
+            console.log('User not found:', email);
+            return res.status(400).json({
+                status: "error",
+                message: "User not Registered.",
+            });
         }
-    ); 
+
+        console.log('User found:', alreadyExistUser);
+
+        const matchedPassword = await bcrypt.compare(password, alreadyExistUser.password_hash);
+
+        if (!matchedPassword) {
+            console.log('Password mismatch for user:', email);
+            return res.status(400).json({
+                status: "error",
+                message: "Sorry, Wrong Password.",
+            });
+        }
+
+        console.log('Password matched for user:', email);
+
+        const token = jwt.sign({ userId: alreadyExistUser._id },secretKey);
+        console.log('JWT Token:', token);
+
+        return res.status(200).json({
+            status: "success",
+            message: "Login successful",
+            token,
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.status(500).json({
+            status: "error",
+            message: "Internal server error.",
+        });
     }
-    console.log('password matched so it means user can kind of login');
-const token = jwt.sign({ userId: alreadyExistUser._id }, secretKey); 
-
-return res.status(200).json({
-    status: "success",
-    message: "Login successful",
-    token: token,  
-});    
-    
 }
 
-async function logout(params) {
-    
-}
-
-async function update(params) {
-    
-}
 
 
 async function forgotPassword(req,res) {
