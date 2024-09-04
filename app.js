@@ -18,6 +18,9 @@ const db = require('./db');
 // importing diffrent routers
 const authRouter = require('./routers/auth.router')
 
+// importing general routers
+const generalRouter = require('./routers/general.router');
+
 
 
 // creating app
@@ -40,6 +43,12 @@ app.get('/test', (req, res) => {
 
 
 app.use(authRouter);
+
+
+app.use(generalRouter);
+
+
+
 
 
 
