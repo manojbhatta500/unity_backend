@@ -8,9 +8,9 @@ const authenticateUser = (req, res, next) => {
     try {
         let token = req.headers.authorization;
         if (token) {
-            token = token.split(" ")[1]; // Remove 'Bearer ' part
+            token = token.split(" ")[1]; 
             let user = jwt.verify(token, secretKey);
-            console.log('Decoded JWT user object:', user);  // Debugging line
+            console.log('Decoded JWT user object:', user);  
             req.userid = user.userId; // Use userId as decoded from the token
             console.log('middleware is working req.userid set', req.userid);
             next(); 
