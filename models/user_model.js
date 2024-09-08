@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: true,
         unique: true,
         trim: true
     },
@@ -22,11 +21,15 @@ const userSchema = new mongoose.Schema({
     },
     password_hash: {
         type: String,
-        required: true
+        trim:true
+    },
+    googleId: {  
+        type: String,
+        unique: true,
+        sparse: true 
     },
     date_of_birth: {
         type: Date,
-        // required: true
     },
     registration_date: {
         type: Date,

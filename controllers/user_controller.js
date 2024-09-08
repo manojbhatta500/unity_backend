@@ -14,7 +14,66 @@ require('dotenv').config();
 
 const secretKey = process.env.SECRETKEY;
 
- 
+
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client('635613543687-q1s9ugc68oubmgcbo79sa3jpd4r55hfq.apps.googleusercontent.com'); 
+
+async function validateGoogleUser(req, res) {
+  const { idToken } = req.body;  
+  if (!idToken) {
+    return res.status(400).json({
+      status: "error",
+      message: "idToken is required",
+    });
+  }
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: idToken,  
+      audience: '635613543687-q1s9ugc68oubmgcbo79sa3jpd4r55hfq.apps.googleusercontent.com',  
+    });
+    const payload = ticket.getPayload();  
+    console.log(payload);
+    const doesUserExists = await UserModel.findOne({
+        email : payload.email
+    });
+    if(doesUserExists){
+        console.log("user already exists");
+        const token = jwt.sign({ userId: doesUserExists._id },secretKey);
+        console.log('JWT Token:', token);
+        return res.status(200).json({
+            status: "success",
+            message: `Successfully logged in as ${payload.name}.`,
+            token: token,
+          });    
+    }else{
+        // user does not exists and will sign in and then login 
+        // created user and now login
+        const userSignUpResult = await UserModel.create({
+            username : payload.name,
+            email: payload.email,
+            name:payload.given_name,
+            googleId:payload.sub,
+            profile_picture_url: payload.picture
+        });
+        console.log('user created successfully');
+        console.log('now we will loggin user.');
+        const token = jwt.sign({ userId: userSignUpResult._id },secretKey);
+        console.log('JWT Token:', token);
+        return res.status(200).json({
+            status: "success",
+            message: `Successfully signed up and logged in as ${payload.name}.`,
+            token: token,
+          });
+    }
+  } catch (error) {
+    console.error('Error verifying Google ID token:', error);
+    return res.status(401).json({
+      status: "error",
+      message: "Invalid Google ID token",
+    });
+  }
+}
+
 
 
 async function signUp(req,res){
@@ -346,12 +405,15 @@ async function afterVerificationChangePassword(req, res) {
 }
 
 
+
+
 module.exports = {
     signUp,
     login,
     checkOtp,
     forgotPassword,
-    afterVerificationChangePassword
+    afterVerificationChangePassword,
+    validateGoogleUser
 }
 
 
