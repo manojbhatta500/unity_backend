@@ -83,28 +83,44 @@ async function DeleteUserPost(req, res) {
 }
 
 
-async function fetchAllPostIds(req, res) {
+
+
+
+  
+
+async function getReletedPosts(req, res) {
+    console.log('get releted post function calling');
     try {
-      const posts = await postModel.find({}, '_id');
+      const posts = await postModel.find({}).populate('user_id', 'username email profile_picture_url');
   
-      const postIds = posts.map(post => post._id);
-  
-      res.status(200).json({ postIds });
-    } catch (error) {
-      res.status(500).json(
-        {
-            status: "error",
-            message: "An error occurred while fetching user data"
+      const modifiedPosts = posts.map(post => {
+        if (!post.user_id.profile_picture_url) {
+          post.user_id.profile_picture_url = 'empty'; 
         }
-      );
+        return post;
+      });
+
+    
+    //  await new Promise(resolve => setTimeout(resolve, 5000));
+
+
+      return res.status(200).json({
+        status: "success",
+        data: modifiedPosts
+      });
+    } catch (e) {
+      return res.status(404).json({
+        status: "error",
+        message: "Error while fetching posts and user data."
+      });
     }
   }
+  
 
 
-  async function fetchIndividualPost(req,res) {
+  async function fetchUserDataFromPost(req,res) {
 
-
-    console.log('fetch individual post id function running');
+    console.log('fetch fetchUserDataFromPost  function running');
 
     const postId = req.params.id; 
 
@@ -112,11 +128,9 @@ async function fetchAllPostIds(req, res) {
         return  res.status(500).json(
             {
                 status: "error",
-                message: "post id is required for fetching post data"
+                message: "post id is required for fetching user data releted to post."
             }
           );
-        
-
     }
 
 
@@ -143,17 +157,10 @@ async function fetchAllPostIds(req, res) {
 
     console.log(userData);
 
-    // console.log('Waiting for 9 seconds...');
-    // // Use Promise directly without function
-    // await new Promise(resolve => setTimeout(resolve, 9000));
-
-    // console.log('9 seconds have passed');
-
 
     return res.status(200).json(
         {
-            status: true,
-            data: postData,
+            status: "success",
             userdata: {
                 username: userData.username,
                 name: userData.name || null,
@@ -166,31 +173,12 @@ async function fetchAllPostIds(req, res) {
   }
 
 
-  async function getReletedPosts(req,res) {
-    try{
-        const posts = await postModel.find({});
-        return res.status(200).json(
-            {
-                status: "success",
-                data: posts
-            }
-        );
-    }catch(e){
-        return res.status(404).json({
-            status: "error",
-            message: "error while fetching user data."
-        });
-    } 
-  }
-
-
 
 
 module.exports = {
     SaveUserPost,
     EditUserPost,
     DeleteUserPost,
-    fetchAllPostIds,
-    fetchIndividualPost,
-    getReletedPosts
+    getReletedPosts,
+    fetchUserDataFromPost
 }
