@@ -2,6 +2,24 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+
+const multer = require('multer'); 
+
+
+
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/'); 
+    },
+    filename: function (req, file, cb) {
+      cb(null, `${Date.now()}-${file.originalname}`); 
+    }
+  });
+  
+  const upload = multer({ storage });
+
+
 const {
     authenticateUser
 } = require('./middlewares/authenticate.user');
@@ -55,9 +73,31 @@ app.use(generalRouter);
 app.use(postRouter);
 
 
-
-
-
+app.post('/upload', upload.single('image'), (req, res) => {
+    const postId = req.body.postId;
+  
+    if (!postId) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Post ID is required.'
+      });
+    }
+  
+    if (!req.file) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Image file is required.'
+      });
+    }
+  
+    res.json({
+      status: 'success',
+      message: 'File uploaded successfully.',
+      filePath: `uploads/${req.file.filename}`,
+      postId: postId
+    });
+  });
+  
 
 
 
