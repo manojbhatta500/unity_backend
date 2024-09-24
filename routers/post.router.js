@@ -2,6 +2,9 @@ const express = require('express');
 
 const {authenticateUser} = require('../middlewares/authenticate.user');
 
+
+const upload = require('../multerConfig');
+
 const {
     SaveUserPost,
     EditUserPost,
@@ -14,7 +17,13 @@ const {
 const router = express.Router();
 
 
-router.post('/post',authenticateUser,SaveUserPost);
+
+
+  router.post('/post', authenticateUser, upload.single('image'), (req, res) => {
+    SaveUserPost(req, res);
+  });
+  
+  
 router.patch('/post/:id',authenticateUser,EditUserPost);
 router.delete('/post/:id',authenticateUser,DeleteUserPost);
 router.get('/post',authenticateUser,getReletedPosts);

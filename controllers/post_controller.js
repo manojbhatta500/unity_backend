@@ -2,54 +2,63 @@ const postModel = require('../models/post_model');
 const userModel = require('../models/user_model');
 
 
-async function SaveUserPost(req,res) {
-
-const {
-    title,
-    content,
-    image_url,
-    category
-} = req.body;
-
-if(!title || !content || !category){
-    return res.status(404).json({
-        status: "error",
-        message: "title,content,category are required"
-    });
-}
+const path = require('path');
 
 
-try{
-
-    const createdPost = await postModel.create({
-        title: title,
-        content: content,
-        image_url: image_url|| null,
-        user_id: req.userid  ,
-        category: category
-    });
 
 
-    if(!createdPost){
-        return res.status(404).json({
+async function SaveUserPost(req, res) {
+    const file = req.file; 
+    const { title, content, category } = req.body;
+
+    if (!file) {
+        return res.status(400).json({
             status: "error",
-            message: "error while creating post"
+            message: "Image is required."
         });
     }
 
-    return res.status(200).json({
-        status: "success",
-        data: createdPost,
-       
-    });
-}catch(error){
-    console.error('Error fetching user data:', error);
-        res.status(500).json({
+    if (!title || !content || !category) {
+        return res.status(400).json({
             status: "error",
-            message: "An error occurred while fetching user data"
+            message: "Title, content, and category are required."
         });
-}   
+    }
+
+    try {
+        // Construct the image URL or file path
+        const imageUrl = path.join('uploads', file.filename);
+        
+        // Save the post in the database
+        const createdPost = await postModel.create({
+            title,
+            content,
+            image_url: imageUrl,
+            user_id: req.userid,
+            category
+        });
+
+        if (!createdPost) {
+            return res.status(500).json({
+                status: "error",
+                message: "Error while creating post"
+            });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            data: createdPost,
+        });
+        
+    } catch (error) {
+        console.error('Error saving post:', error);
+        return res.status(500).json({
+            status: "error",
+            message: "An error occurred while saving the post"
+        });
+    }
 }
+
 
 async function EditUserPost(req, res) {
     try {
