@@ -29,6 +29,10 @@ const generalRouter = require('./routers/general.router');
 
 const postRouter = require('./routers/post.router');
 
+// user router 
+
+const userRouter = require('./routers/user.router');
+
 
 const path = require('path');
 
@@ -58,28 +62,28 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 // this is for testing
-app.post('/test',multerConfig.single('image'), (req, res) => {
+// app.post('/test',multerConfig.single('image'), (req, res) => {
 
-    console.log('/test function is running ');
+//     console.log('/test function is running ');
   
-    const file = req.file; 
+//     const file = req.file; 
 
-    const {postId} = req.body;
+//     const {postId} = req.body;
 
 
 
-    if (!file ) {
-        return res.status(400).json({
-            status: "error",
-            message: "Image and post id is required."
-        });
-    }
+//     if (!file ) {
+//         return res.status(400).json({
+//             status: "error",
+//             message: "Image and post id is required."
+//         });
+//     }
 
-    return res.status(200).json({
-        status : "success",
-        message : "successfully tested."
-    });
-});
+//     return res.status(200).json({
+//         status : "success",
+//         message : "successfully tested."
+//     });
+// });
 
 
 
@@ -97,6 +101,8 @@ app.use(generalRouter);
 
 
 app.use(postRouter);
+
+app.use(userRouter);
 
 
 
