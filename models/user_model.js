@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
     phone_number: {
         type: String,
         trim: true,
-        match: [/^\d{10,15}$/, 'is invalid'] 
+       
     },
     bio: {
         type: String,
