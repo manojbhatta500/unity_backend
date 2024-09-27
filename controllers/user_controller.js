@@ -407,13 +407,17 @@ async function afterVerificationChangePassword(req, res) {
 
 
 
+
+
+
 module.exports = {
     signUp,
     login,
     checkOtp,
     forgotPassword,
     afterVerificationChangePassword,
-    validateGoogleUser
+    validateGoogleUser,
+    
 }
 
 

@@ -1,4 +1,8 @@
 const UserModel = require('../models/user_model'); 
+const path = require('path');
+const fs = require('fs'); 
+
+
 
 async function getBasicUserData(req, res) {
     
@@ -131,7 +135,66 @@ async function editBasicUserData(req, res) {
       });
     }
   }
+
+
+
+
+async function changeProfilePicture(req, res) {
+  console.log('change profile picture function is called');
+  console.log('req id is ' + req.userid);
+
+  const file = req.file; 
+  if (!file) {
+    return res.status(400).json({
+      status: "error",
+      message: "Image is required."
+    });
+  }
+
+  try {
+    const foundUser = await UserModel.findOne({ _id: req.userid });
+    console.log('User found:', foundUser);
+    console.log('the set profile picture is ' + foundUser.profile_picture_url);
+
+    if (foundUser.profile_picture_url) {
+      // Profile picture exists, delete the old one
+      const oldImagePath = path.join(__dirname, '..', foundUser.profile_picture_url);
+      console.log('Deleting old profile picture:', oldImagePath);
+
+      // Check if the file exists before attempting to delete it
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath); // Delete the old file
+        console.log('Old profile picture deleted successfully.');
+      } else {
+        console.log('Old profile picture not found, skipping deletion.');
+      }
+    }
+
+    // Save the new profile picture URL
+    const newImageUrl = path.join('uploads', file.filename);
+    foundUser.profile_picture_url = newImageUrl;
+
+    // Save the user data with updated profile picture
+    await foundUser.save();
+
+    return res.status(200).json({
+      status: "success",
+      message: "Profile picture updated successfully.",
+      desc: foundUser
+    });
+
+  } catch (error) {
+    console.error('Error updating profile picture:', error);
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred while updating profile picture."
+    });
+  }
+}
+
   
+
+
 
 
 
@@ -139,5 +202,6 @@ async function editBasicUserData(req, res) {
 
 module.exports = {
     getBasicUserData,
-    editBasicUserData
+    editBasicUserData,
+    changeProfilePicture
 }

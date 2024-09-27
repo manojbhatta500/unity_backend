@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
     bio: {
         type: String,
         trim: true,
-        maxlength: 20
+        maxlength: 50
     },
     last_login: {
         type: Date
