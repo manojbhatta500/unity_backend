@@ -1,6 +1,7 @@
 const UserModel = require('../models/user_model'); 
 const path = require('path');
 const fs = require('fs'); 
+const bcrypt = require('bcryptjs');
 
 
 
@@ -192,6 +193,62 @@ async function changeProfilePicture(req, res) {
   }
 }
 
+
+async function ChangePassword(req,res) {
+  const {
+    npassword
+  } = req.body;
+  if(!npassword){
+    return res.status(404).json({
+      status: "error",
+      message: "npassword is required."
+  });
+  }
+  try{
+    if(npassword.length < 8){
+      console.log("the length of password is ",npassword.length);
+      console.log("the password is  ", npassword);
+      return res.status(400).json({
+          status: "error",
+          message: "password length must be 8 characters."
+      });
+  }
+    const foundUser = await UserModel.findOne({
+      _id: req.userid  
+  });
+  if (!foundUser) {
+      return res.status(404).json({
+          status: "error",
+          message: "User not found"
+      });
+  }
+  const samePassword = await bcrypt.compare(npassword, foundUser.password_hash);
+  if(samePassword){
+    return res.status(404).json({
+      status: "error",
+      message: "sorry, can't use same password."
+  });
+  }
+  const newHashedPassword = await  bcrypt.hash(npassword,10);
+  foundUser.password_hash = newHashedPassword;
+  foundUser.save();
+  res.status(200).json({
+    status: "success",
+    message : "password changed successfully.",
+  });
+  }catch(e){
+
+    return res.status(400).json({
+      status: "error",
+      message: "can't update an password at this moment."
+  });
+
+  }
+
+
+  
+}
+
   
 
 
@@ -203,5 +260,6 @@ async function changeProfilePicture(req, res) {
 module.exports = {
     getBasicUserData,
     editBasicUserData,
-    changeProfilePicture
+    changeProfilePicture,
+    ChangePassword
 }
