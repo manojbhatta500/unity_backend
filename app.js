@@ -29,6 +29,9 @@ const postRouter = require('./routers/post.router');
 
 const userRouter = require('./routers/user.router');
 
+// community router 
+const communityRouter = require('./routers/community.router');
+
 
 const path = require('path');
 
@@ -56,6 +59,8 @@ app.use(generalRouter);
 app.use(postRouter);
 
 app.use(userRouter);
+
+app.use(communityRouter);
 
 
 
