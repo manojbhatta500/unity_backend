@@ -6,11 +6,11 @@ const CommunitySchema = new mongoose.Schema({
     name:{
         type:String,
         required: true,
-        maxlength:15
+        maxlength:20
     },
     description:{
         type: String,
-        maxlength:30
+        maxlength:100
     },
     community_type:{
     type: String,
@@ -27,7 +27,11 @@ const CommunitySchema = new mongoose.Schema({
     },
     rules:{
         type: String,
-        maxlength:50
+        maxlength:100
+    },
+    cover_url:{
+        type: String
+
     },
     creation_date:{
         type: Date,
