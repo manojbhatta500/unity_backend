@@ -101,8 +101,53 @@ async function createCommunityWithPicture(req,res) {
 
 
 
+async function getAllAdimCommunity(req,res) {
+    console.log('this is get all admin community function running');
+    console.log(req.userid);
+
+    const communities = await communityModel.find({
+        admin: req.userid
+    });
+    if(!communities){
+        return res.status(200).json({
+            status: "error",
+            message : "you are not admin of any community",
+        });
+    }
+    //set admin feature
+    // if list is empty then show one state 
+    // if list is not empty then show and make inside the function and other 
+
+        //   await new Promise(resolve => setTimeout(resolve, 3000));
+
+    return res.status(200).json({
+        status: "success",
+        msg : "all the communities are fetched",
+        com: communities
+    });  
+}
+
+async function fetchSingleCommunity(req,res) {
+    console.log('single community  fetched');
+    const id = req.params.id;
+    console.log('id is ',id);
+    const community = await communityModel.findById(id);
+    if(!community){
+        return res.status(400).json({
+            status: "error",
+            message: "no community found  with this id"
+        });
+    }
+    console.log('found community now sending it');
+   return res.status(200).json(community);
+}
+
+
+
 
 module.exports = {
     createCommunity,
-    createCommunityWithPicture
+    createCommunityWithPicture,
+    getAllAdimCommunity,
+    fetchSingleCommunity
 }

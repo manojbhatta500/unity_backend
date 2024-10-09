@@ -4,8 +4,10 @@ const upload = require('../multerConfig');
 
 const {
     createCommunity,
-    createCommunityWithPicture
-
+    createCommunityWithPicture,
+    getAllAdimCommunity,
+    fetchSingleCommunity
+    
 } = require('../controllers/community_controller');
 const {authenticateUser} = require('../middlewares/authenticate.user');
 
@@ -20,6 +22,10 @@ router.post('/create/community',authenticateUser,createCommunity);
 router.post('/create/community/cover',authenticateUser,upload.single('image'),(req,res)=>{
     createCommunityWithPicture(req,res);
 });
+
+router.get('/community',authenticateUser,getAllAdimCommunity);
+
+router.get('/community/:id',authenticateUser,fetchSingleCommunity);
 
 
 
