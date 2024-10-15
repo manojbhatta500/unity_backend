@@ -139,9 +139,93 @@ async function fetchSingleCommunity(req,res) {
         });
     }
     console.log('found community now sending it');
+    // await new Promise(resolve => setTimeout(resolve, 10000));
+
    return res.status(200).json(community);
 }
 
+
+async function editSingleCommunity(req,res) {
+    console.log('edit single community is running');
+
+    const communityId = req.params.id;
+
+    console.log(`community id is ${communityId}`);
+
+
+    const data = req.body;
+    console.log(data);
+    // maybe i should make middleware of it because i have to use it i guess let's see
+    if(Object.keys(data).length ===0){
+        return res.status(400).json({
+            status: "error",
+            message: "please send body."
+        });
+    }
+    // atleast body should have one feild and use frontend for that logic
+    const updataedData = {};
+    if(data.name){
+        const communityNameExists =  await communityModel.findOne({
+            name: data.name.trim()
+        });
+        if(communityNameExists){
+            console.log(communityNameExists);
+            return res.status(400).json({
+                status: "error",
+                message: "community name already exists. try another one"
+            });
+        }else{
+            console.log('community  name does not exists');
+            updataedData.name = data.name.trim();
+        }
+    }
+
+
+    if(data.description){
+        updataedData.description = data.description.trim();
+    }
+    if(data.community_type){
+        updataedData.community_type = data.community_type.trim();
+    }
+    if(data.rules){
+        updataedData.rules = data.rules.trim();
+    }
+
+    // for cover url we will make another api 
+
+    const isModified = Object.keys(updataedData).length > 0;
+
+    if(!isModified){
+        return res.status(400).json({
+          status: "error",
+          message: "No changes were made.",
+        });
+    }
+
+
+
+    const updatedCommunity = await communityModel.findOneAndUpdate(
+        {_id: communityId},
+        {$set: updataedData},
+        {new:true}
+    );
+
+    
+    if(updatedCommunity){
+        console.log('User data updated successfully.');
+        return res.status(200).json({
+            status: "edit single community is working",
+            updatedData : updatedCommunity
+        });
+       
+    }else{
+        console.log(updataedData);
+        return res.status(200).json({
+            status: "error",
+            message: "community is not updated.",
+          });
+    }   
+}
 
 
 
@@ -149,5 +233,6 @@ module.exports = {
     createCommunity,
     createCommunityWithPicture,
     getAllAdimCommunity,
-    fetchSingleCommunity
+    fetchSingleCommunity,
+    editSingleCommunity
 }

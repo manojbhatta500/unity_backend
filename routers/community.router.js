@@ -6,7 +6,8 @@ const {
     createCommunity,
     createCommunityWithPicture,
     getAllAdimCommunity,
-    fetchSingleCommunity
+    fetchSingleCommunity,
+    editSingleCommunity
     
 } = require('../controllers/community_controller');
 const {authenticateUser} = require('../middlewares/authenticate.user');
@@ -26,6 +27,8 @@ router.post('/create/community/cover',authenticateUser,upload.single('image'),(r
 router.get('/community',authenticateUser,getAllAdimCommunity);
 
 router.get('/community/:id',authenticateUser,fetchSingleCommunity);
+
+router.post('/community/:id',authenticateUser,editSingleCommunity);
 
 
 
