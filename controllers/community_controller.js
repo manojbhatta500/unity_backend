@@ -114,10 +114,6 @@ async function getAllAdimCommunity(req,res) {
             message : "you are not admin of any community",
         });
     }
-    //set admin feature
-    // if list is empty then show one state 
-    // if list is not empty then show and make inside the function and other 
-
         //   await new Promise(resolve => setTimeout(resolve, 3000));
 
     return res.status(200).json({
@@ -140,7 +136,6 @@ async function fetchSingleCommunity(req,res) {
     }
     console.log('found community now sending it');
     // await new Promise(resolve => setTimeout(resolve, 10000));
-
    return res.status(200).json(community);
 }
 
@@ -162,7 +157,6 @@ async function editSingleCommunity(req,res) {
             message: "please send body."
         });
     }
-    // atleast body should have one feild and use frontend for that logic
     const updataedData = {};
     if(data.name){
         const communityNameExists =  await communityModel.findOne({
@@ -214,7 +208,7 @@ async function editSingleCommunity(req,res) {
     if(updatedCommunity){
         console.log('User data updated successfully.');
         return res.status(200).json({
-            status: "edit single community is working",
+            status: "success",
             updatedData : updatedCommunity
         });
        

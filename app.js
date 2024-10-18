@@ -32,6 +32,10 @@ const userRouter = require('./routers/user.router');
 // community router 
 const communityRouter = require('./routers/community.router');
 
+// map router 
+
+const mapRouter = require('./routers/map.router');
+
 
 const path = require('path');
 
@@ -63,6 +67,7 @@ app.use(userRouter);
 app.use(communityRouter);
 
 
+app.use(mapRouter);
 
 // port setting from env
 const PORT = process.env.PORT || 3000;
